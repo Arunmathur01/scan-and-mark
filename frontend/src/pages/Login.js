@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { SHA256 } from "crypto-js";
 import axios from "axios";
 import "../styles/Login.css";
 import image512 from "../assets/logo512.png";
