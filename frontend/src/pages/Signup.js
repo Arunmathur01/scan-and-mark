@@ -7,6 +7,10 @@ import image192 from "../assets/logo192.png";
 import { SHA256 } from "crypto-js";
 import see from "../assets/see.png";
 import hide from "../assets/hide.png";
+import API_BASE_URL from '../config';
+// ... existing code ...
+
+// ... existing code ...
 
 // Configure axios defaults
 axios.defaults.withCredentials = true;
@@ -45,7 +49,7 @@ const Signup = () => {
           ...(type === "student" ? { rollno } : { pno, dob })
         };
         try {
-          const response = await axios.post("http://localhost:5000/users/signup", formData, {
+          const response = await axios.post(`${API_BASE_URL}/users/signup`, formData, {
             withCredentials: true,
             headers: {
               'Content-Type': 'application/json'
