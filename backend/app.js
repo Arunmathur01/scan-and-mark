@@ -19,13 +19,18 @@ const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB;
 
 // Middleware
+// app.use(cors({
+//   origin: process.env.NODE_ENV === "production" 
+//     ? process.env.CLIENT_URL 
+//     : "http://localhost:3000",
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// }));
+
 app.use(cors({
-  origin: process.env.NODE_ENV === "production" 
-    ? process.env.CLIENT_URL 
-    : "http://localhost:3000",
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: 'http://localhost:3000',
+  credentials: true
 }));
 
 app.use(cookieParser());
@@ -39,11 +44,27 @@ app.use(
 
 // Connect to MongoDB
 mongoose
-  .connect(MONGODB_URI, {})
-  .then(() => {
-    console.log("Database Connected");
+  .connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
   })
-  .catch((err) => console.log(err));
+  .then(() => {
+    console.log("Database Connected Successfully");
+  })
+  .catch((err) => {
+    console.error("MongoDB Connection Error:", err);
+    process.exit(1);
+  });
+
+// Add connection error handler
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB Connection Error:', err);
+});
+
+// Add disconnection handler
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB Disconnected');
+});
 
 // Routes
 app.use("/users", userRoutes);

@@ -7,6 +7,7 @@ import image512 from "../assets/logo512.png";
 import image192 from "../assets/logo192.png";
 import see from "../assets/see.png";
 import hide from "../assets/hide.png";
+import API_BASE_URL from '../api';
 
 const queryParameters = new URLSearchParams(window.location.search);
 axios.defaults.withCredentials = true;
@@ -14,18 +15,15 @@ axios.defaults.withCredentials = true;
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("token") || "");
-  const [userType, setUserType] = useState("student"); // Default to student
+  const [userType, setUserType] = useState("student");
   const navigate = useNavigate();
-
-  function computeHash(input) {
-    return SHA256(input).toString();
-  }
 
   const handleLoginSubmit = async (e) => {
     let session_id = "";
     let teacher = "";
     try {
       session_id = queryParameters.get("session_id");
+      console.log(session_id)
       teacher = queryParameters.get("email");
     } catch (err) {
       console.log("No query parameters");
@@ -36,18 +34,13 @@ const Login = () => {
     let password = e.target.password.value;
 
     if (email.length > 0 && password.length > 0) {
-      password = computeHash(password);
-      password = computeHash(email + password);
       const formData = {
         email,
         password,
         type: userType
       };
       try {
-        const response = await axios.post(
-          "http://localhost:5000/users/signin",
-          formData
-        );
+        const response = await axios.post(`${API_BASE_URL}/users/signin`, formData);
         let user = response.data.user;
         let type = response.data.type;
         let token = response.data.token;

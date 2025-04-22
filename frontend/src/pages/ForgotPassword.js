@@ -4,6 +4,7 @@ import axios from "axios";
 import image512 from "../assets/logo512.png";
 import image192 from "../assets/logo192.png";
 import { SHA256 } from "crypto-js";
+import API_BASE_URL from '../api';
 
 const ForgotPassword = () => {
   // eslint-disable-next-line
@@ -74,10 +75,7 @@ const ForgotPassword = () => {
           password,
         };
         try {
-          await axios.post(
-            "http://localhost:5050/users/forgotpassword",
-            formData
-          );
+          await axios.post(`${API_BASE_URL}/users/forgot-password`, formData);
           navigate("/login");
         } catch (err) {
           console.log(err);

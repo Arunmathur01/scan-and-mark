@@ -1,7 +1,9 @@
 //create a new session component
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import "../styles/StudentForm.css";
+import API_BASE_URL from '../api';
+import { useNavigate } from "react-router-dom";
 
 const StudentForm = ({ togglePopup }) => {
   //eslint-disable-next-line
@@ -81,7 +83,7 @@ const StudentForm = ({ togglePopup }) => {
             try {
               console.log("sending data to server");
               const response = await axios.post(
-                "http://localhost:5050/sessions/attend_session",
+                `${API_BASE_URL}/sessions/attend_session`,
                 formData,
                 {
                   headers: {

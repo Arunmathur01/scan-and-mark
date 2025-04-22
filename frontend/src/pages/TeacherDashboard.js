@@ -4,6 +4,7 @@ import "../styles/Dashboard.css";
 import { useNavigate } from "react-router-dom";
 import NewSession from "./NewSession";
 import SessionDetails from "./SessionDetails";
+import API_BASE_URL from '../api';
 
 axios.defaults.withCredentials = true;
 
@@ -19,12 +20,9 @@ const TeacherDashboard = () => {
   //update list of sessions
   const updateList = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:5050/sessions/getSessions",
-        {
-          token: token,
-        }
-      );
+      const response = await axios.post(`${API_BASE_URL}/sessions/getSessions`, {
+        token: token,
+      });
       setSessionList(response.data.sessions);
     } catch (err) {
       console.error(err);

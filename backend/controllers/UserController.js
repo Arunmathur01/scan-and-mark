@@ -1,13 +1,18 @@
 import dotenv from "dotenv";
-dotenv.config();
 import { Student } from "../model/Student.js";
 import { Teacher } from "../model/Teacher.js";
 import { generateToken } from "../config/jwt.js";
+import bcrypt from "bcrypt";
 
-//login
+dotenv.config();
+
+// Login
 async function Login(req, res) {
   const { email, password, type } = req.body;
-  
+  console.log(email);
+  console.log(password);
+  console.log(type);
+
   try {
     let user;
     if (type === "student") {
@@ -15,9 +20,12 @@ async function Login(req, res) {
     } else {
       user = await Teacher.findOne({ email });
     }
+    
+    console.log(user);
 
     if (user) {
-      if (user.password === password) {
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (isMatch) {
         const token = generateToken({ email: user.email });
         user.type = type;
         res
@@ -38,72 +46,112 @@ async function Login(req, res) {
   }
 }
 
-// Create a new user
+// Signup
 async function Signup(req, res) {
   const { name, email, password, type, rollno, pno, dob } = req.body;
-  
+
+  console.log("Signup request received:", { name, email, type, rollno, pno, dob });
+
   try {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters long" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     if (type === "student") {
       if (!rollno) {
         return res.status(400).json({ message: "Roll number is required for students" });
       }
-      const user = new Student({
-        name,
-        email,
-        rollno,
-        password,
-      });
+
       const existingUser = await Student.findOne({ email }).exec();
       if (existingUser) {
         return res.status(400).json({ message: "User already exists" });
       }
+
+      const user = new Student({
+        name,
+        email,
+        rollno,
+        password: hashedPassword,
+      });
+
       const newUser = await user.save();
       res.status(201).json(newUser);
     } else {
+      if (!pno || !dob) {
+        return res.status(400).json({ message: "Phone number and date of birth are required for teachers" });
+      }
+
+      const existingUser = await Teacher.findOne({ email }).exec();
+      console.log(existingUser)
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists" });
+      }
+
       const user = new Teacher({
         name,
         email,
         pno,
         dob,
-        password,
+        password: hashedPassword,
       });
-      const existingUser = await Teacher.findOne({ email }).exec();
-      if (existingUser) {
-        return res.status(400).json({ message: "User already exists" });
-      }
+
       const newUser = await user.save();
       res.status(201).json(newUser);
     }
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error("Signup error:", err);
+    res.status(500).json({ message: "Server error during signup" });
   }
 }
 
-//change password
+// Forgot Password
 async function ForgotPassword(req, res) {
   const { email, password } = req.body;
-  //check if user is a student
-  let user = await Student.findOneAndUpdate({ email }, { password }).exec();
-  if (!user) {
-    user = await Teacher.findOneAndUpdate({ email }, { password }).exec();
-  }
-  if (user) {
-    res.status(200).json({ message: "Password changed successfully" });
-  } else {
-    res.status(400).json({ message: "No such User" });
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    let user = await Student.findOneAndUpdate({ email }, { password: hashedPassword }).exec();
+    if (!user) {
+      user = await Teacher.findOneAndUpdate({ email }, { password: hashedPassword }).exec();
+    }
+
+    if (user) {
+      res.status(200).json({ message: "Password changed successfully" });
+    } else {
+      res.status(400).json({ message: "No such User" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Server error during password reset" });
   }
 }
 
-//edit user details
+// Edit User Details
 async function EditUserDetails(req, res) {
   const { email, name, pno, dob } = req.body;
-  //check if user is a student
-  let user = await Student.findOneAndUpdate({ email }, { name, pno, dob }).exec();
-  if (!user) {
-    user = await Teacher.findOneAndUpdate({ email }, { name, pno, dob }).exec();
-  }
-  if (user) {
-    res.status(200).json({ message: "User updated" });
+
+  try {
+    let user = await Student.findOneAndUpdate({ email }, { name, pno, dob }).exec();
+    if (!user) {
+      user = await Teacher.findOneAndUpdate({ email }, { name, pno, dob }).exec();
+    }
+
+    if (user) {
+      res.status(200).json({ message: "User updated" });
+    } else {
+      res.status(400).json({ message: "User not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Server error during update" });
   }
 }
 

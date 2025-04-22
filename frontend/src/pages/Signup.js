@@ -7,6 +7,7 @@ import image192 from "../assets/logo192.png";
 import { SHA256 } from "crypto-js";
 import see from "../assets/see.png";
 import hide from "../assets/hide.png";
+import API_BASE_URL from '../api';
 
 // Configure axios defaults
 axios.defaults.withCredentials = true;
@@ -33,10 +34,10 @@ const Signup = () => {
     let pno = e.target.pno?.value;
     let dob = e.target.dob?.value;
 
+    console.log("Form data:", { name, email, type, rollno, pno, dob });
+
     if (password.length > 0 && confirmPassword.length > 0) {
       if (password === confirmPassword) {
-        password = computeHash(password);
-        password = computeHash(email + password);
         const formData = {
           name,
           email,
@@ -44,17 +45,20 @@ const Signup = () => {
           type,
           ...(type === "student" ? { rollno } : { pno, dob })
         };
+        console.log("Sending data to server:", formData);
         try {
-          const response = await axios.post("http://localhost:5000/users/signup", formData, {
+          const response = await axios.post(`${API_BASE_URL}/users/signup`, formData, {
             withCredentials: true,
             headers: {
               'Content-Type': 'application/json'
             }
           });
+          console.log("Server response:", response.data);
           if (response.data) {
             navigate("/login");
           }
         } catch (err) {
+          console.error("Signup error:", err.response?.data);
           setError(err.response?.data?.message || "Registration failed");
         }
       } else {
