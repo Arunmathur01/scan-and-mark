@@ -7,6 +7,7 @@ import image512 from "../assets/logo512.png";
 import image192 from "../assets/logo192.png";
 import see from "../assets/see.png";
 import hide from "../assets/hide.png";
+import API_BASE_URL from '../config';
 
 const queryParameters = new URLSearchParams(window.location.search);
 axios.defaults.withCredentials = true;
@@ -44,10 +45,7 @@ const Login = () => {
         type: userType
       };
       try {
-        const response = await axios.post(
-          "http://localhost:5000/users/signin",
-          formData
-        );
+        const response = await axios.post(`${API_BASE_URL}/users/signin`, formData);
         let user = response.data.user;
         let type = response.data.type;
         let token = response.data.token;
