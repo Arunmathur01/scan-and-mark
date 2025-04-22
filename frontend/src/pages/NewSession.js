@@ -3,6 +3,11 @@ import React, { useState } from "react";
 import axios from "axios";
 import QRCode from "qrcode.react";
 import "../styles/NewSession.css";
+import API_BASE_URL from '../config';
+// ... existing code ...
+
+// ... existing code ...
+
 
 // Configure axios defaults
 axios.defaults.withCredentials = true;
@@ -57,17 +62,13 @@ const NewSession = ({ togglePopup }) => {
               radius,
             };
             try {
-              const response = await axios.post(
-                "http://localhost:5000/sessions/create",
-                formData,
-                {
-                  withCredentials: true,
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                  }
+           const response = await axios.post(`${API_BASE_URL}/sessions/create`, formData, {
+                withCredentials: true,
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
                 }
-              );
+              });
               setQrData(response.data.url);
               setQrtoggle(true);
             } catch (err) {
