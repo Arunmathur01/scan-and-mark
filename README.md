@@ -52,6 +52,3 @@ To run ScanMark locally, follow these steps:
 
 The application is deployed and accessible at [ScanMark Deploy](https://scanmark-deploy.onrender.com).
 
-## Contact
-
-For questions or feedback, feel free to contact us at [rahulagniotri4444@gmail.com](mailto:rahulagniotri4444@gmail.com), [dhruvilpatel2002@gmail.com](mailto:dhruvilpatel2002@gmail.com).
